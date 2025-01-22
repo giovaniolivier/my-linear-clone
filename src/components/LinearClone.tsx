@@ -1,67 +1,8 @@
-import PropTypes from 'prop-types';
-import { 
-  ChevronDown, 
-  Bell, 
-  LayoutGrid, 
-  Settings, 
-  Users,
-  Filter, 
-  Plus, 
-  Menu, 
-  PanelLeft, 
-  Clock,
-  ChevronRight 
-} from 'lucide-react';
-
-// Composant pour le bouton de navigation
-const NavButton = ({ icon: Icon, children }) => (
-  <div className="flex items-center gap-2 p-2 rounded hover:bg-gray-800 cursor-pointer">
-    <Icon className="w-4 h-4" />
-    <span>{children}</span>
-  </div>
-);
-
-// Validation des props pour NavButton
-NavButton.propTypes = {
-  icon: PropTypes.elementType.isRequired, // Validation que icon est un composant React
-  children: PropTypes.node.isRequired,    // Validation que children est un élément React valide
-};
-
-// Composant pour l'en-tête de section
-const SectionHeader = ({ children }) => (
-    <div className="flex items-center gap-2 mb-2">
-      <span className="text-sm font-medium">{children}</span>
-      <ChevronDown className="w-4 h-4 ml-auto" />
-    </div>
-  );
-  
-  // Validation des props pour SectionHeader
-  SectionHeader.propTypes = {
-    children: PropTypes.node.isRequired, // Validation que children est un élément React valide
-  };
-  
-
-// Composant pour l'item de tâche
-const TodoItem = ({ number, title }) => (
-    <div className="flex items-center gap-4 p-3 rounded hover:bg-gray-800 cursor-pointer">
-      <div className="w-4 h-4 border border-gray-600 rounded-full"></div>
-      <div className="flex-1">
-        <div className="flex items-center gap-2">
-          <span className="text-gray-500">GIO-{number}</span>
-          <span>{title || `Task ${number}`}</span>
-        </div>
-      </div>
-      <span className="text-gray-500">Jan 22</span>
-      <ChevronRight className="w-4 h-4 text-gray-500" />
-    </div>
-  );
-  
-  // Validation des props pour TodoItem
-  TodoItem.propTypes = {
-    number: PropTypes.number.isRequired, // Validation que 'number' est un nombre
-    title: PropTypes.string, // Validation que 'title' est une chaîne de caractères (facultatif)
-  };
-  
+import React from 'react';
+import NavButton from './NavButton';
+import SectionHeader from './SectionHeader';
+import TodoItem from './TodoItem';
+import { ChevronDown, Bell, Settings, LayoutGrid, Filter, Plus, Menu, PanelLeft, Clock, Users } from 'lucide-react';
 
 const LinearClone = () => {
   return (
