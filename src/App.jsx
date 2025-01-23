@@ -6,10 +6,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Route vers la page de connexion */}
         <Route path="/" element={<LoginPage />} />
-        
-        {/* Route vers la page LinearClone */}
         <Route path="/dashboard" element={<LinearClone />} />
       </Routes>
     </Router>
