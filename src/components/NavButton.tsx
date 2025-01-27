@@ -7,7 +7,7 @@ interface NavButtonProps {
 }
 
 const NavButton = ({ icon: Icon, children }: NavButtonProps) => (
-  <div className="flex items-center gap-2 p-2 rounded hover:bg-gray-800 cursor-pointer">
+  <div className="flex items-center gap-2 p-2 rounded hover:bg-[#17181b] cursor-pointer">
     <Icon className="w-4 h-4" />
     <span>{children}</span>
   </div>
