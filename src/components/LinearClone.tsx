@@ -34,14 +34,14 @@ const LinearClone: React.FC = () => {
             <ChevronDown className={`w-4 h-4 ml-2 transition-transform ${isUserDropdownOpen ? 'rotate-180' : 'rotate-0'}`} />
           </div>
           {isUserDropdownOpen && (
-            <div className="absolute bg-[#17181b] border rounded-[5px] border-[#23252a] text-sm text-gray-300 shadow-lg w-50 mt-0">
-              <div className="p-2 hover:bg-gray-700 cursor-pointer">Settings</div>
-              <div className="p-2 hover:bg-gray-700 cursor-pointer">Invite and manage members</div>
+            <div className="absolute bg-[#101012] border rounded-[5px] border-[#23252a] p-2 text-sm text-gray-300 shadow-lg w-50 mt-0">
+              <div className="p-2 hover:bg-[#17181b] rounded-[5px] cursor-pointer">Settings</div>
+              <div className="p-2 hover:bg-[#17181b] rounded-[5px] cursor-pointer">Invite and manage members</div>
               <hr className=" border-[#23252a]"></hr>
-              <div className="p-4 hover:bg-gray-700 cursor-pointer">Download desktop app</div>
+              <div className="p-2 hover:bg-[#17181b] rounded-[5px] cursor-pointer">Download desktop app</div>
               <hr className=" border-[#23252a]"></hr>
-              <div className="p-2 hover:bg-gray-700 cursor-pointer">Switch workspace</div>
-              <div className="p-2 hover:bg-gray-700 cursor-pointer">Log out</div>
+              <div className="p-2 hover:bg-[#17181b] rounded-[5px] cursor-pointer">Switch workspace</div>
+              <div className="p-2 hover:bg-[#17181b] rounded-[5px] cursor-pointer">Log out</div>
             </div>
           )}
         </div>
