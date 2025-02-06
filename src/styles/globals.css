@@ -1,3 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.hidden-google-btn iframe {
+    display: none !important;
+}
+.hidden {
+  display: none;
+}
+

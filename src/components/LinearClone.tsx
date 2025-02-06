@@ -1,21 +1,90 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import NavButton from './NavButton';
 import SectionHeader from './SectionHeader';
 import TodoItem from './TodoItem';
 import { ChevronDown, Bell, Settings, LayoutGrid, Filter, Plus, Menu, PanelLeft, Clock, Users } from 'lucide-react';
 
-const tasks = [
+const TASKS = [
   { id: 1, title: "Welcome to Linear 👋" },
   { id: 2, title: "Plan your first project" },
   { id: 3, title: "Invite your team" },
 ];
 
+const FILTER_OPTIONS = ["All issues", "Active", "Backlog"];
+
+interface UserDropdownProps {
+  isOpen: boolean;
+  onLogout: () => void;
+}
+
+const UserDropdown: React.FC<UserDropdownProps> = ({ isOpen, onLogout }) => {
+  if (!isOpen) return null;
+  
+  return (
+    <div className="absolute z-10 bg-[#101012] border rounded-[5px] border-[#23252a] p-2 text-sm text-gray-300 shadow-lg w-64 mt-0">
+      <div className="p-2 hover:bg-[#17181b] rounded-[5px] cursor-pointer">Settings</div>
+      <div className="p-2 hover:bg-[#17181b] rounded-[5px] cursor-pointer">Invite and manage members</div>
+      <hr className="border-[#23252a]" />
+      <div className="p-2 hover:bg-[#17181b] rounded-[5px] cursor-pointer">Download desktop app</div>
+      <hr className="border-[#23252a]" />
+      <div className="p-2 hover:bg-[#17181b] rounded-[5px] cursor-pointer">Switch workspace</div>
+      <div
+        className="p-2 hover:bg-[#17181b] rounded-[5px] cursor-pointer text-red-500"
+        onClick={onLogout}
+      >
+        Log out
+      </div>
+    </div>
+  );
+};
+
 const LinearClone: React.FC = () => {
-  const [selectedFilter, setSelectedFilter] = useState<string>("All issues");
-  const [isWorkspaceOpen, setIsWorkspaceOpen] = useState<boolean>(true);
-  const [isTeamsOpen, setIsTeamsOpen] = useState<boolean>(true);
-  const [isTryOpen, setIsTryOpen] = useState<boolean>(true);
-  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState<boolean>(false);
+  const [user, setUser] = useState<any>(null); 
+  const [selectedFilter, setSelectedFilter] = useState(FILTER_OPTIONS[0]);
+  const [openSections, setOpenSections] = useState({
+    workspace: true,
+    teams: true,
+    try: true,
+    userDropdown: false
+  });
+
+  const getInitials = (name: string) => {
+    if (!name) return "U";
+    
+    const words = name.split(" ");
+    const initials = words
+      .map(word => word[0])
+      .join("")
+      .toUpperCase();
+  
+    return initials.slice(0, 2);
+  };
+
+  const navigate = useNavigate();
+  const username = localStorage.getItem("username") || "Utilisateur";
+  const initials = getInitials(username);
+
+  const toggleSection = (section: keyof typeof openSections) => {
+    setOpenSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const storedUsername = localStorage.getItem("username");
+    if (!token) {
+      navigate("/dashboard");
+    }
+  }, []);
+
+  const handleLogout = () => {
+    console.log("Utilisateur déconnecté");
+    localStorage.removeItem("token");
+    window.location.href = "/";
+  };
 
   return (
     <div className="flex h-screen bg-[#090909] text-gray-300">
@@ -25,42 +94,46 @@ const LinearClone: React.FC = () => {
         <div className="relative">
           <div
             className="flex items-center gap-2 mb-4 cursor-pointer"
-            onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+            onClick={() => toggleSection('userDropdown')}
           >
             <div className="w-6 h-6 bg-purple-600 rounded flex items-center justify-center">
-              <span className="text-xs text-white">GI</span>
+              <span className="text-xs text-white">{initials}</span>
             </div>
-            <span className="text-sm">giovani</span>
-            <ChevronDown className={`w-4 h-4 ml-2 transition-transform ${isUserDropdownOpen ? 'rotate-180' : 'rotate-0'}`} />
+            <span className="text-sm">{username}</span>
+            <ChevronDown 
+              className={`w-4 h-4 ml-2 transition-transform ${
+                openSections.userDropdown ? 'rotate-180' : 'rotate-0'
+              }`} 
+            />
           </div>
-          {isUserDropdownOpen && (
-            <div className="absolute bg-[#101012] border rounded-[5px] border-[#23252a] p-2 text-sm text-gray-300 shadow-lg w-50 mt-0">
-              <div className="p-2 hover:bg-[#17181b] rounded-[5px] cursor-pointer">Settings</div>
-              <div className="p-2 hover:bg-[#17181b] rounded-[5px] cursor-pointer">Invite and manage members</div>
-              <hr className=" border-[#23252a]"></hr>
-              <div className="p-2 hover:bg-[#17181b] rounded-[5px] cursor-pointer">Download desktop app</div>
-              <hr className=" border-[#23252a]"></hr>
-              <div className="p-2 hover:bg-[#17181b] rounded-[5px] cursor-pointer">Switch workspace</div>
-              <div className="p-2 hover:bg-[#17181b] rounded-[5px] cursor-pointer">Log out</div>
-            </div>
-          )}
+          <UserDropdown 
+            isOpen={openSections.userDropdown} 
+            onLogout={handleLogout} 
+          />
         </div>
 
-        {/* Main navigation */}
+        {/* Navigation principale */}
         <nav className="text-sm space-y-1">
           <NavButton icon={PanelLeft}>Inbox</NavButton>
           <NavButton icon={Clock}>My Issues</NavButton>
         </nav>
 
-        {/* Workspace section with dropdown */}
+        {/* Section Workspace */}
         <div className="text-sm mt-6">
           <SectionHeader>
-            <div className="flex items-center justify-between cursor-pointer" onClick={() => setIsWorkspaceOpen(!isWorkspaceOpen)}>
+            <div 
+              className="flex items-center justify-between cursor-pointer" 
+              onClick={() => toggleSection('workspace')}
+            >
               <span>Workspace</span>
-              <ChevronDown className={`w-4 h-4 ml-2 transition-transform ${isWorkspaceOpen ? "rotate-180" : "rotate-0"}`} />
+              <ChevronDown 
+                className={`w-4 h-4 ml-2 transition-transform ${
+                  openSections.workspace ? "rotate-180" : "rotate-0"
+                }`} 
+              />
             </div>
           </SectionHeader>
-          {isWorkspaceOpen && (
+          {openSections.workspace && (
             <nav className="space-y-1">
               <NavButton icon={LayoutGrid}>Projects</NavButton>
               <NavButton icon={Filter}>Views</NavButton>
@@ -69,34 +142,48 @@ const LinearClone: React.FC = () => {
           )}
         </div>
 
-        {/* Teams section with dropdown */}
+        {/* Section Teams */}
         <div className="text-sm mt-6">
           <SectionHeader>
-            <div className="flex items-center justify-between cursor-pointer" onClick={() => setIsTeamsOpen(!isTeamsOpen)}>
+            <div 
+              className="flex items-center justify-between cursor-pointer" 
+              onClick={() => toggleSection('teams')}
+            >
               <span>Your teams</span>
-              <ChevronDown className={`w-4 h-4 ml-2 transition-transform ${isTeamsOpen ? "rotate-180" : "rotate-0"}`} />
+              <ChevronDown 
+                className={`w-4 h-4 ml-2 transition-transform ${
+                  openSections.teams ? "rotate-180" : "rotate-0"
+                }`} 
+              />
             </div>
           </SectionHeader>
-          {isTeamsOpen && (
+          {openSections.teams && (
             <div className="flex items-center gap-2 p-2 rounded bg-[#17181b]">
               <div className="w-5 h-5 bg-purple-600 rounded flex items-center justify-center">
-                <span className="text-xs text-white">GI</span>
+                <span className="text-xs text-white">{initials}</span>
               </div>
-              <span>Giovani</span>
+              <span>{username}</span>
               <ChevronDown className="w-4 h-4 ml-auto" />
             </div>
           )}
         </div>
 
-        {/* Try section with dropdown */}
+        {/* Section Try */}
         <div className="text-sm mt-6">
           <SectionHeader>
-            <div className="flex items-center justify-between cursor-pointer" onClick={() => setIsTryOpen(!isTryOpen)}>
+            <div 
+              className="flex items-center justify-between cursor-pointer" 
+              onClick={() => toggleSection('try')}
+            >
               <span>Try</span>
-              <ChevronDown className={`w-4 h-4 ml-2 transition-transform ${isTryOpen ? "rotate-180" : "rotate-0"}`} />
+              <ChevronDown 
+                className={`w-4 h-4 ml-2 transition-transform ${
+                  openSections.try ? "rotate-180" : "rotate-0"
+                }`} 
+              />
             </div>
           </SectionHeader>
-          {isTryOpen && (
+          {openSections.try && (
             <nav className="space-y-1">
               <NavButton icon={Plus}>Import Issues</NavButton>
               <NavButton icon={Users}>Invite people</NavButton>
@@ -105,12 +192,12 @@ const LinearClone: React.FC = () => {
         </div>
       </div>
 
-      {/* Main content */}
+      {/* Contenu principal */}
       <div className="border rounded-[5px] border-[#23252a] text-sm m-2 bg-[#101012] flex-1 flex flex-col">
         {/* Header */}
         <div className="border-b border-[#23252a] p-2 pl-10 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            {["All issues", "Active", "Backlog"].map((item) => (
+            {FILTER_OPTIONS.map((item) => (
               <div
                 key={item}
                 onClick={() => setSelectedFilter(item)}
@@ -129,7 +216,7 @@ const LinearClone: React.FC = () => {
           </div>
         </div>
 
-        {/* Content */}
+        {/* Contenu */}
         <div className="p-4 flex-1 overflow-auto">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center pl-6 gap-2 cursor-pointer">
@@ -142,10 +229,14 @@ const LinearClone: React.FC = () => {
             </div>
           </div>
 
-          {/* Todo list */}
+          {/* Liste des tâches */}
           <div className="space-y-2 pl-3">
-            {tasks.map((task) => (
-              <TodoItem key={task.id} number={task.id} title={task.title} />
+            {TASKS.map((task) => (
+              <TodoItem 
+                key={task.id} 
+                number={task.id} 
+                title={task.title} 
+              />
             ))}
           </div>
         </div>

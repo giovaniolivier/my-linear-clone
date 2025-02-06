@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LoginPage from './components/LoginPage';
 import LinearClone from './components/LinearClone';
+import './styles/globals.css';
 
 function App() {
   return (
