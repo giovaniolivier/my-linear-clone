@@ -2,10 +2,75 @@
 @tailwind components;
 @tailwind utilities;
 
+
+body {
+  background-color: #090909;
+}
+
 .hidden-google-btn iframe {
     display: none !important;
 }
 .hidden {
   display: none;
 }
+
+@media (max-width: 768px) {
+  .linear-clone {
+    flex-direction: column;
+  }
+
+  .main-content {
+    width: 100%;
+    margin: 0;
+  }
+
+  .header-actions {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .filter-options {
+    flex-direction: column;
+  }
+
+  .mobile-hidden {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .linear-clone {
+    flex-direction: column;
+  }
+
+  .main-content {
+    width: 100%;
+    margin: 0;
+  }
+
+  .header-actions {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .filter-options {
+    flex-direction: column;
+  }
+
+  .mobile-hidden {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .touch-target {
+    min-height: 44px;
+  }
+
+  .text-compact {
+    font-size: 0.75rem;
+  }
+}
+
+
 

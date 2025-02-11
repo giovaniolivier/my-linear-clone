@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Menu as MenuIcon, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import NavButton from './NavButton';
 import SectionHeader from './SectionHeader';
@@ -74,7 +75,6 @@ const LinearClone: React.FC = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    const storedUsername = localStorage.getItem("username");
     if (!token) {
       navigate("/dashboard");
     }
@@ -85,12 +85,12 @@ const LinearClone: React.FC = () => {
     localStorage.removeItem("token");
     window.location.href = "/";
   };
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen bg-[#090909] text-gray-300">
+    <div className="linear-clone flex h-screen bg-[#090909] text-gray-300">
       {/* Sidebar */}
-      <div className="w-64 p-4 flex flex-col">
-        {/* User section */}
+      <div className={`sidebar w-64 p-4 flex flex-col fixed md:static top-0 left-0 h-full bg-[#090909] transform transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 z-40`}>        {/* User section */}
         <div className="relative">
           <div
             className="flex items-center gap-2 mb-4 cursor-pointer"
@@ -192,27 +192,71 @@ const LinearClone: React.FC = () => {
         </div>
       </div>
 
+      {/* Fond sombre pour mobile */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black opacity-50 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Contenu principal */}
-      <div className="border rounded-[5px] border-[#23252a] text-sm m-2 bg-[#101012] flex-1 flex flex-col">
+      <div className="main-content flex-1 border rounded-[5px] border-[#23252a] text-sm m-2 bg-[#101012] flex flex-col">
         {/* Header */}
-        <div className="border-b border-[#23252a] p-2 pl-10 flex items-center justify-between">
+        <div className="header-actions border-b border-[#23252a] p-2 pl-4 flex items-center gap-4 bg-[#101012]">
+          {/* Menu burger et actions - groupés à gauche en mobile */}
           <div className="flex items-center gap-4">
-            {FILTER_OPTIONS.map((item) => (
-              <div
-                key={item}
-                onClick={() => setSelectedFilter(item)}
-                className={`text-gray-500 border rounded-[5px] border-[#23252a] hover:bg-[#17181b] px-2 py-1 flex items-center gap-2 cursor-pointer ${
-                  selectedFilter === item ? "bg-[#17181b] text-white" : ""
-                }`}
-              >
-                <span>{item}</span>
-                <ChevronDown className="w-4 h-4" />
-              </div>
-            ))}
+            <button 
+              className="md:hidden z-50"
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              aria-label="Toggle menu"
+            >
+              {isSidebarOpen ? <X className="w-4 h-4" /> : <MenuIcon className="w-4 h-4" />}
+            </button>
+            {/* Filtres - cachés en mobile */}
+            <div className="hidden md:flex items-center gap-2">
+              {FILTER_OPTIONS.map((item) => (
+                <div
+                  key={item}
+                  onClick={() => setSelectedFilter(item)}
+                  className={`text-gray-500 border rounded-[5px] border-[#23252a] hover:bg-[#17181b] px-3 py-1.5 flex items-center gap-2 cursor-pointer ${
+                    selectedFilter === item ? "bg-[#17181b] text-white" : ""
+                  }`}
+                >
+                  <span className="text-sm">{item}</span>
+                  <ChevronDown className="w-4 h-4" />
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="flex items-center mr-6 gap-8">
-            <Bell className="w-5 h-5 cursor-pointer" />
-            <Settings className="w-5 h-5 cursor-pointer" />
+          {/* Icônes droites - toujours visibles */}
+          <div className="flex items-center ml-auto gap-4">
+            <button 
+              className="text-gray-500 hover:text-gray-300"
+              aria-label="Filter view"
+            >
+              <Filter className="w-4 h-4" />
+            </button>
+            <button 
+              className="text-gray-500 hover:text-gray-300"
+              aria-label="Notifications"
+            >
+              <Bell className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+        {/* Nouvelle barre de filtres */}
+        <div className="flex items-center justify-between p-2 pl-4 border-b border-[#23252a]">
+          {/* Côté gauche - Filtre */}
+          <div className="flex items-center gap-2">
+            <Filter className="w-4 h-4 text-gray-500" />
+            <span className="text-sm text-gray-500">Filter</span>
+          </div>
+          {/* Côté droit - Todo counter */}
+          <div className="flex items-center gap-2 mr-4">
+            <span className="text-sm text-gray-500">Todo</span>
+            <span className="text-xs bg-[#17181b] px-1.5 py-0.5 rounded-full text-gray-500">9</span>
+            <Plus className="w-4 h-4 text-gray-500 ml-2" />
           </div>
         </div>
 
