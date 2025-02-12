@@ -45,7 +45,7 @@ const LoginPage: React.FC = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      navigate("/"); // Redirige vers la page de connexion si l'utilisateur est déconnecté
+      navigate("/");
     }
   }, []);
 
