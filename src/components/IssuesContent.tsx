@@ -2,6 +2,8 @@ import React from 'react';
 import { Menu as MenuIcon, X, Bell, Filter, Plus, ChevronDown } from 'lucide-react';
 import { Dialog } from "@headlessui/react";
 import { useState } from 'react';
+import { string } from 'prop-types';
+import { ChevronRight } from "lucide-react";
 
 
 interface MainContentProps {
@@ -21,8 +23,42 @@ const IssuesContent: React.FC<MainContentProps> = ({
 }) => {
   
   const [isOpen, setIsOpen] = useState(false);
+  const [issues, setIssues] = useState<{ id: number; title: string; date: string }[]>([]);
+  const [newIssue, setNewIssue] = useState("");
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; index: number } | null>(null);
+
+
+  const addIssue = () => {
+    if (newIssue.trim() !== "") {
+      const newId = issues.length > 0 ? issues[issues.length - 1].id + 1 : 1;
+      const currentDate = new Date().toLocaleDateString("fr-FR", {
+        day: "2-digit",
+        month: "short",
+      });
+
+      const issue = { id: newId, title: newIssue, date: currentDate };
+      setIssues([...issues, issue]);
+      setNewIssue("");
+      setIsOpen(false);
+    }
+  }
+
+  const deleteIssue = (index: number) => {
+    setIssues(issues.filter((_, i) => i !== index));
+    setContextMenu(null);
+  };
+
+  const handleContextMenu = (event: React.MouseEvent, index: number) => {
+    event.preventDefault();
+    setContextMenu({ x: event.clientX, y: event.clientY, index });
+  };
+
+  const handleCloseContextMenu = () => {
+    setContextMenu(null);
+  };
+
   return (
-    <div className="main-content flex-1 border rounded-[5px] border-[#23252a] text-sm m-2 bg-[#101012] flex flex-col">
+    <div onClick={handleCloseContextMenu} className="main-content flex-1 border rounded-[5px] border-[#23252a] text-sm m-2 bg-[#101012] flex flex-col">
       {/* Header */}
       <div className="header-actions border-b border-[#23252a] p-2 pl-4 flex items-center gap-4 bg-[#101012]">
         <div className="flex items-center gap-4">
@@ -76,27 +112,60 @@ const IssuesContent: React.FC<MainContentProps> = ({
         </div>
       </div>
 
-      <div className="h-screen flex flex-col items-center justify-center text-white">
-        <div className="text-center">
-          <div className="mb-4">
-            <svg
-              className="mx-auto h-16 w-16 text-gray-500"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+        {issues.length === 0 ? (
+          <div className="h-screen flex flex-col items-center justify-center text-white text-center">
+            <div className="mb-4">
+              <svg
+                className="mx-auto h-16 w-16 text-gray-500"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <circle cx="12" cy="12" r="10" strokeWidth="2" />
+              </svg>
+            </div>
+            <p className="text-gray-400">No issues created by you</p>
+            <button
+              onClick={() => setIsOpen(true)}
+              className="mt-4 px-4 py-2 bg-indigo-600 rounded-lg hover:bg-indigo-500"
             >
-              <circle cx="12" cy="12" r="10" strokeWidth="2" />
-            </svg>
+              Create new issue
+            </button>
           </div>
-          <p className="text-gray-400">No issues created by you</p>
-          <button
-            onClick={() => setIsOpen(true)}
-            className="mt-4 px-4 py-2 bg-indigo-600 rounded-lg hover:bg-indigo-500"
+        ) : (
+          issues.map((issue, index) => (
+            <div
+              key={issue.id}
+              onContextMenu={(e) => handleContextMenu(e, index)}
+              className="flex items-center gap-4 p-3 rounded hover:bg-[#17181b] cursor-pointer"
+            >
+              <div className="w-4 h-4 border border-gray-600 rounded-full"></div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-500">GIO-{issue.id}</span>
+                  <span>{issue.title}</span>
+                </div>
+              </div>
+              <span className="text-gray-500">{issue.date}</span>
+              <ChevronRight className="w-4 h-4 text-gray-500" />
+            </div>
+          ))
+        )}
+
+        {contextMenu && (
+          <div
+            className="absolute bg-[#17181b] shadow-md border border-[#23252a] rounded py-2 px-4"
+            style={{ top: contextMenu.y, left: contextMenu.x }}
           >
-            Create new issue
-          </button>
-        </div>
+            <button
+              onClick={() => deleteIssue(contextMenu.index)}
+              className="text-gray-500"
+            >
+              Delete
+            </button>
+          </div>
+        )}
 
         <Dialog open={isOpen} onClose={() => setIsOpen(false)} className="fixed inset-0 flex items-center justify-center">
           <div className="bg-[#1c1d1f] p-4 border border-zinc-700 rounded-lg w-[800px] shadow-lg relative">
@@ -122,6 +191,8 @@ const IssuesContent: React.FC<MainContentProps> = ({
             </div>
             <input
               type="text"
+              value={newIssue} 
+              onChange={(e) => setNewIssue(e.target.value)}
               placeholder="Issue title"
               className="mt-3 w-full p-2 bg-[#1c1d1f] focus:outline-none rounded-md text-white"
             />
@@ -139,12 +210,16 @@ const IssuesContent: React.FC<MainContentProps> = ({
                 <input type="checkbox" id="createMore" className="form-checkbox text-indigo-600" />
                 <label htmlFor="createMore" className="text-sm text-gray-300">Create more</label>
               </div>
-              <button className="px-4 py-2 bg-indigo-600 rounded-lg text-sm text-white hover:bg-indigo-500">Create issue</button>
+              <button 
+                onClick={addIssue}
+                className="px-4 py-2 bg-indigo-600 rounded-lg text-sm text-white hover:bg-indigo-500"
+              >
+                Create issue
+              </button>
             </div>
           </div>
         </Dialog>
       </div>
-    </div>
   );
 };
 
