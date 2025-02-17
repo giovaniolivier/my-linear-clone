@@ -2,7 +2,7 @@ import React from 'react';
 import { ReactNode } from 'react';
 
 interface NavButtonProps {
-  icon: React.ElementType; // Type du composant d'icône
+  icon: React.ElementType;
   children: ReactNode;
 }
 

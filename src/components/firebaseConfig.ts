@@ -20,7 +20,7 @@ const signInWithGoogle = async () => {
     const user = result.user;
     localStorage.setItem("username", user.displayName || "Utilisateur");
     localStorage.setItem("token", user.uid);
-    window.location.href = "/dashboard"; // Redirection après connexion
+    window.location.href = "/dashboard";
   } catch (error) {
     console.error("Erreur de connexion :", error);
   }

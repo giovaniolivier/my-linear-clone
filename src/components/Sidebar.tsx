@@ -4,6 +4,7 @@ import { ChevronDown, PanelLeft, Clock, LayoutGrid, Filter, Menu, Plus, Users } 
 import NavButton from './NavButton';
 import SectionHeader from './SectionHeader';
 import UserDropdown from './UserDropdown';
+import { Link } from "react-router-dom";
 
 interface SidebarProps {
     isSidebarOpen: boolean;
@@ -28,7 +29,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   handleLogout
 }) => {
   return (
-    <div className={`sidebar w-64 p-4 flex flex-col fixed md:static top-0 left-0 h-full bg-[#090909] transform transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 z-40`}>
+    <div className={`sidebar w-60 p-5 flex flex-col fixed md:static top-0 left-0 h-full bg-[#090909] transform transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 z-40`}>
       {/* User section */}
       <div className="relative">
         <div
@@ -54,7 +55,9 @@ const Sidebar: React.FC<SidebarProps> = ({
       {/* Navigation principale */}
       <nav className="text-sm space-y-1">
         <NavButton icon={PanelLeft}>Inbox</NavButton>
-        <NavButton icon={Clock}>My Issues</NavButton>
+        <Link to="/my-issues/assigned">
+          <NavButton icon={Clock}>My Issues</NavButton>
+        </Link>
       </nav>
 
       {/* Section Workspace */}
