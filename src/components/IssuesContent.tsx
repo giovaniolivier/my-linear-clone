@@ -99,15 +99,27 @@ const IssuesContent: React.FC<MainContentProps> = ({
         </div>
 
         <Dialog open={isOpen} onClose={() => setIsOpen(false)} className="fixed inset-0 flex items-center justify-center">
-          <div className="bg-[#1c1d1f] p-6 rounded-lg w-[800px] shadow-lg relative">
-            <button
-              aria-label="Ouvrir la fenêtre"
-              onClick={() => setIsOpen(false)}
-              className="absolute top-2 right-2 text-gray-400 hover:text-white"
-            >
-              <X size={20} />
-            </button>
-            <h2 className="text-lg font-bold text-gray-300">New Issue</h2>
+          <div className="bg-[#1c1d1f] p-4 border border-zinc-700 rounded-lg w-[800px] shadow-lg relative">
+            <div className="flex justify-between items-center p-2 border-zinc-700">
+              <div className="flex items-center gap-2 text-sm text-zinc-400">
+                <span className="text-purple-400">GIO</span>
+                <span>•</span>
+                <span>New issue</span>
+              </div>
+              <div className="flex gap-2">
+                <button className="text-zinc-400 hover:bg-zinc-800 px-2 py-1 rounded">
+                  Save as draft
+                </button>
+                <button className="text-zinc-400 hover:bg-zinc-800 p-1 rounded">↗</button>
+                <button
+                  aria-label="Ouvrir la fenêtre"
+                  onClick={() => setIsOpen(false)}
+                  className="text-zinc-400 hover:bg-zinc-800 p-1 rounded"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+            </div>
             <input
               type="text"
               placeholder="Issue title"
@@ -117,17 +129,17 @@ const IssuesContent: React.FC<MainContentProps> = ({
               placeholder="Add description..."
               className="mt-3 w-full p-2 bg-[#1c1d1f] focus:outline-none rounded-md text-white"
             />
-            <div className="flex items-center mt-4 gap-2">
+            <div className="flex py-2 border-b border-zinc-700 items-center mt-2 gap-2">
               <button className="px-3 py-1 bg-gray-700 rounded-md text-gray-300">Backlog</button>
               <button className="px-3 py-1 bg-gray-700 rounded-md text-gray-300">Priority</button>
               <button className="px-3 py-1 bg-gray-700 rounded-md text-gray-300">@oliviergiovani00</button>
             </div>
-            <div className="mt-4 flex justify-between items-center">
+            <div className="mt-2 flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <input type="checkbox" id="createMore" className="form-checkbox text-indigo-600" />
-                <label htmlFor="createMore" className="text-gray-300">Create more</label>
+                <label htmlFor="createMore" className="text-sm text-gray-300">Create more</label>
               </div>
-              <button className="px-4 py-2 bg-indigo-600 rounded-lg hover:bg-indigo-500">Create issue</button>
+              <button className="px-4 py-2 bg-indigo-600 rounded-lg text-sm text-white hover:bg-indigo-500">Create issue</button>
             </div>
           </div>
         </Dialog>
