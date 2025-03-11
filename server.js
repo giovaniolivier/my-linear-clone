@@ -1,140 +1,89 @@
+import dotenv from "dotenv";
 import express from "express";
-import cors from "cors";
+import mysql from "mysql2";
 import nodemailer from "nodemailer";
+import cors from "cors";
 import bodyParser from "body-parser";
 import crypto from "crypto";
-import dotenv from "dotenv";
 
 dotenv.config();
 
+
 const app = express();
-
-app.use(cors({
-    origin: true, // Autorise toutes les origines en développement
-    methods: ['GET', 'POST'],
-    allowedHeaders: ['Content-Type'],
-}));
-
+app.use(cors());
 app.use(bodyParser.json());
 
-const codes = {}; // Stocke temporairement les codes (à remplacer par une DB en prod)
+// 🔌 Connexion à MySQL
+const db = mysql.createConnection({
+  host: "localhost",
+  user: "root",
+  password: "",
+  database: "linear_db",
+});
 
-// Ajoute une expiration aux codes
-const CODE_EXPIRATION_TIME = 10 * 60 * 1000; // 10 minutes
+db.connect((err) => {
+  if (err) throw err;
+  console.log("💾 Connecté à MySQL");
+});
 
-// Fonction de validation d'email
-const validateEmail = (email) => {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-};
+// 📩 Configurer l'envoi d'email
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 
-// Vérification de la connexion SMTP
-const verifySMTP = () => {
-  return new Promise((resolve, reject) => {
-    const transporter = nodemailer.createTransport({
-      service: "Gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-    
-    transporter.verify((error, success) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(success);
-      }
-    });
-  });
-};
-
-app.post("/send-email", async (req, res) => {
+// 📌 Envoyer un code par email
+app.post("/send-code", async (req, res) => {
   try {
-    const { email } = req.body;
-    console.log("Email reçu:", email);
+      console.log("Requête reçue:", req.body);
+      const { email } = req.body;
+      if (!email) throw new Error("Email manquant");
 
-    if (!email) {
-      return res.status(400).json({ error: "Email requis" });
-    }
-    if (!validateEmail(email)) {
-      return res.status(400).json({ error: "Adresse email invalide" });
-    }
+      const code = crypto.randomInt(100000, 999999).toString();
 
-    // Vérification des variables d'environnement
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      console.error("Les variables EMAIL_USER ou EMAIL_PASS ne sont pas définies !");
-      return res.status(500).json({ error: "Configuration du serveur email incorrecte" });
-    }
+      console.log("Génération du code:", code);
 
-    // Générer le code de validation
-    const code = crypto.randomInt(100000, 999999).toString();
-    codes[email] = {
-      code,
-      timestamp: Date.now(), // Ajout de l'horodatage
-    };
-    console.log("Code généré:", code);
+      await db.promise().query("DELETE FROM verification_codes WHERE email = ?", [email]);
 
-    // Configuration du transporteur
-    const transporter = nodemailer.createTransport({
-      service: "Gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+      await db.promise().query("INSERT INTO verification_codes (email, code) VALUES (?, ?)", [email, code]);
 
-    // Vérifier la connexion au SMTP
-    try {
-      await verifySMTP();
-      console.log("Serveur SMTP prêt à envoyer des emails.");
-    } catch (error) {
-      console.error("Erreur de connexion au SMTP:", error);
-      return res.status(500).json({
-        error: "Problème de connexion au serveur email",
-        details: error.message,
-      });
-    }
+      console.log("Code enregistré en BD");
 
-    // Configuration de l'email à envoyer
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Votre code de connexion",
-      text: `Votre code de connexion est : ${code}`,
-    };
+      const mailOptions = {
+          from: process.env.EMAIL_USER,
+          to: email,
+          subject: "Votre code de confirmation",
+          text: `Votre code de confirmation est : ${code}`,
+      };
 
-    // Envoi de l'email
-    await transporter.sendMail(mailOptions);
-    console.log("Email envoyé avec succès !");
-    res.json({ message: "Email envoyé avec succès" });
-    
-  } catch (error) {
-    console.error("Erreur lors de l'envoi de l'email:", error);
-    res.status(500).json({ error: "Échec de l'envoi de l'email", details: error.message });
+      const info = await transporter.sendMail(mailOptions);
+      console.log("Email envoyé:", info.response);
+
+      res.status(200).send({ message: "Code envoyé !" });
+  } catch (err) {
+      console.error("Erreur serveur:", err);
+      res.status(500).send({ message: "Erreur interne", error: err.message });
   }
 });
 
-// Route pour vérifier le code
+
+// ✅ Vérifier le code
 app.post("/verify-code", (req, res) => {
   const { email, code } = req.body;
-  const codeData = codes[email];
 
-  if (codeData) {
-    const isExpired = Date.now() - codeData.timestamp > CODE_EXPIRATION_TIME;
+  db.query("SELECT * FROM verification_codes WHERE email = ? AND code = ? LIMIT 1", [email, code], (err, results) => {
+    if (err) return res.status(500).send({ message: "Erreur BD" });
 
-    if (isExpired) {
-      delete codes[email]; // Supprime le code expiré
-      return res.status(400).json({ error: "Le code a expiré" });
-    }
+    if (results.length === 0) return res.status(400).send({ message: "Code invalide ou expiré !" });
 
-    if (codeData.code === code) {
-      delete codes[email]; // Supprime le code après validation
-      return res.json({ message: "Code valide, connexion réussie" });
-    }
-  }
-
-  res.status(400).json({ error: "Code invalide" });
+    // 🗑 Supprimer le code après vérification
+    db.query("DELETE FROM verification_codes WHERE email = ?", [email]);
+    res.status(200).send({ message: "Code vérifié avec succès !" });
+  });
 });
 
-// Démarrer le serveur
-app.listen(5000, () => console.log("🚀 Serveur démarré sur http://localhost:5000"));
+// 🚀 Démarrer le serveur
+app.listen(5000, () => console.log("🚀 Serveur sur http://localhost:5000"));

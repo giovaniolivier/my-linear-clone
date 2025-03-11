@@ -37,39 +37,27 @@ const LoginPage: React.FC = () => {
     }
   };
 
-  const sendEmail = async () => {
+  // 📩 Envoyer le code par email
+  const sendCode = async () => {
     try {
-      if (!email) {
-        setMessage("Veuillez entrer une adresse email valide.");
-        return;
-      }
-
-      await axios.post("http://localhost:5000/send-email", { email }, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      await axios.post("http://localhost:5000/send-code", { email });
+      setMessage("Code envoyé à votre email !");
+      setShowEmailForm(false);
       setShowCodeForm(true);
-      setMessage("Un code a été envoyé à votre email.");
     } catch (error) {
-      console.error(error);
-      setMessage("Erreur lors de l'envoi de l'email.");
+      setMessage("Erreur lors de l'envoi du code.");
     }
-  };  
+  };
+  
 
-  const verifyCode = async () => {
+   // ✅ Vérifier le code
+   const verifyCode = async () => {
     try {
-      if (!code) {
-        setMessage("Veuillez entrer le code reçu.");
-        return;
-      }
-
-      const res = await axios.post("http://localhost:5000/verify-code", { email, code });
-      setMessage(res.data.message);
-      // Rediriger après succès
+      await axios.post("http://localhost:5000/verify-code", { email, code });
+      setMessage("Code vérifié avec succès !");
       navigate("/dashboard");
     } catch (error) {
-      setMessage("Code invalide. Réessayez.");
+      setMessage("Code invalide !");
     }
   };
 
@@ -99,7 +87,7 @@ const LoginPage: React.FC = () => {
             />
             <button
               className="mb-4 flex w-full items-center justify-center font-bold rounded-lg bg-[#26282f] py-4 text-white text-[12px] transition-colors duration-300 hover:bg-gray-600"
-              onClick={sendEmail}
+              onClick={sendCode}
             >
               Continue with Email
             </button>
@@ -119,10 +107,10 @@ const LoginPage: React.FC = () => {
               value={code}
               onChange={(e) => setCode(e.target.value)}
               placeholder="Enter code"
-              className="w-full p-2 border rounded mb-4 text-black"
+              className="mt-3 mb-4 w-full p-2 bg-[#1c1d1f] py-4 focus:outline-none text-[12px] rounded-md text-white"
             />
             <button
-              className="w-full bg-green-500 text-white py-2 rounded"
+              className="mb-4 flex w-full items-center justify-center font-bold rounded-lg bg-[#26282f] py-4 text-white text-[12px] transition-colors duration-300 hover:bg-gray-600"
               onClick={verifyCode}
             >
               Verify Code
